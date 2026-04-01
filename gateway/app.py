@@ -30,7 +30,7 @@ def checkout():
 
     try:
         response = requests.post(
-            "http://checkout/api/checkout",   # ✅ FIXED (no port)
+            "http://checkout/api/checkout",
             json=request.json,
             headers={"X-Request-Id": request_id},
             timeout=3

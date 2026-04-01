@@ -53,10 +53,13 @@ spec:
           ports:
             - containerPort: 5000
           env:
-              - name: DB_HOST
-                value: postgres
-              - name: DB_PASS
-                value: mypassword
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
           securityContext:
             runAsNonRoot: true
 ---
