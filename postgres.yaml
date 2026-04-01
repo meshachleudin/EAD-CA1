@@ -1,22 +1,3 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-secret
-type: Opaque
-data:
-  POSTGRES_PASSWORD: bXlwYXNzd29yZA==
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,18 +18,18 @@ spec:
           ports:
             - containerPort: 5432
           env:
+            - name: POSTGRES_USER
+              value: postgres
             - name: POSTGRES_DB
               value: checkoutdb
-            - name: POSTGRES_USER
-              value: checkoutuser
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-storage
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
