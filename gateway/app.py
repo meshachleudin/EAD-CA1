@@ -7,26 +7,26 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 def get_request_id():
     return request.headers.get("X-Request-Id", str(uuid.uuid4()))
 
+@app.before_request
+def log_request():
+    rid = get_request_id()
+    logging.info(f"method={request.method} path={request.path} request_id={rid}")
+
 @app.route("/")
 def ui():
-    return "<h1>Checkout System</h1><p>POST /api/checkout to place an order.</p>", 200
+    return "<h1>Checkout System</h1>"
 
 @app.route("/api/arch")
 def arch():
-    request_id = get_request_id()
-    logging.info(f"method=GET path=/api/arch request_id={request_id}")
     return "gateway->checkout->pricing+inventory->postgres", 200
 
 @app.route("/api/ping")
 def ping():
-    request_id = get_request_id()
-    logging.info(f"method=GET path=/api/ping request_id={request_id}")
     return jsonify({"status": "pong"}), 200
 
 @app.route("/api/checkout", methods=["POST"])
 def checkout():
     request_id = get_request_id()
-    logging.info(f"method=POST path=/api/checkout request_id={request_id}")
 
     try:
         response = requests.post(
@@ -36,9 +36,7 @@ def checkout():
             timeout=3
         )
         return jsonify(response.json()), response.status_code
-
-    except requests.exceptions.RequestException as e:
-        logging.error(f"request_id={request_id} error={str(e)}")
+    except requests.exceptions.RequestException:
         return jsonify({"error": "checkout unavailable"}), 503
 
 if __name__ == "__main__":
